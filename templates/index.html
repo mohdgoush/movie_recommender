@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Recommender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap + Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1c1c1c);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            color: #f8f9fa;
+        }
+
+        @keyframes gradientMove {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        .container {
+            margin-top: 80px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffc3;
+            text-shadow: 2px 2px 8px #00f9ff;
+        }
+
+        input[type="text"] {
+            border-radius: 25px;
+            padding: 10px 20px;
+        }
+
+        .btn-primary {
+            border-radius: 25px;
+            background-color: #00ffc3;
+            border: none;
+            color: black;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #00a087;
+            color: white;
+        }
+
+        #suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            margin-top: 5px; /* small space below input */
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        #suggestions div {
+            padding: 10px;
+            color: black;
+            cursor: pointer;
+        }
+
+        #suggestions div:hover {
+            background-color: #f1f1f1;
+        }
+
+        .movie-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px auto;
+            max-width: 500px;
+            box-shadow: 0 0 10px rgba(0,255,195,0.3);
+            transition: 0.3s ease-in-out;
+        }
+
+        .movie-box:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(0,255,195,0.5);
+        }
+
+        .movie-title {
+            font-size: 1.2rem;
+            color: #00ffc3;
+        }
+
+        @media (max-width: 576px) {
+            .form-inline {
+                flex-direction: column;
+            }
+
+            input[type="text"] {
+                width: 100% !important;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1>🎬 Movie Recommender</h1>
+
+        <form method="POST" action="/recommend" autocomplete="off" class="form-inline justify-content-center position-relative mt-4">
+            <input type="text" name="movie" id="movie" class="form-control mr-2 w-50" placeholder="Type a movie name...">
+            <input type="submit" value="Recommend" class="btn btn-primary">
+            <div id="suggestions" class="text-left"></div>
+        </form>
+
+        {% if selected_movie %}
+            <h4 class="mt-4">Top 5 Movies similar to <strong>"{{ selected_movie }}"</strong></h4>
+        {% endif %}
+
+        {% if recommended %}
+            <div class="mt-4">
+                {% for movie in recommended %}
+                    <div class="movie-box">
+                        <div class="movie-title">{{ movie }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif error %}
+            <p class="text-danger mt-4">{{ error }}</p>
+        {% endif %}
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#movie').on('input', function () {
+                let query = $(this).val();
+                if (query.length > 0) {
+                    $.get('/autocomplete', { q: query }, function (data) {
+                        let suggestions = $('#suggestions');
+                        suggestions.empty().show();
+                        data.forEach(function (item) {
+                            suggestions.append('<div>' + item + '</div>');
+                        });
+
+                        $('#suggestions div').on('click', function () {
+                            $('#movie').val($(this).text());
+                            suggestions.hide();
+                        });
+                    });
+                } else {
+                    $('#suggestions').hide();
+                }
+            });
+
+            $(document).click(function (e) {
+                if (!$(e.target).closest('#movie, #suggestions').length) {
+                    $('#suggestions').hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
