@@ -1,8 +1,18 @@
 from flask import Flask, render_template, request, jsonify
 import pickle
 import pandas as pd
+import os
+import gdown
 
 app = Flask(__name__)
+
+# Download similarity_matrix.pkl from Google Drive if not already present
+if not os.path.exists("similarity_matrix.pkl"):
+    file_id = "1IVkJanle7-eDXpWmY8JgWaK0BbHxZAC_"
+    url = f"https://drive.google.com/uc?id={file_id}"
+    output = "similarity_matrix.pkl"
+    print("Downloading similarity matrix...")
+    gdown.download(url, output, quiet=False)
 
 # Load data
 movies_dict = pickle.load(open('movies_dict.pkl', 'rb'))
@@ -21,7 +31,6 @@ def recommend(movie):
     movie_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
     recommended_movies = [movies.iloc[i[0]]['Movie Name'] for i in movie_list]
     return recommended_movies
-
 
 @app.route('/')
 def index():
