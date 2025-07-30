@@ -51,5 +51,5 @@ def autocomplete():
     suggestions = [movie for movie in movies['Movie Name'].values if search in movie.lower()]
     return jsonify(suggestions[:10])  # Limit to 10 suggestions
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
