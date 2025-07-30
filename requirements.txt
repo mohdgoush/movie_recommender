@@ -3,4 +3,4 @@ pandas==2.2.2
 numpy==1.26.4
 requests==2.31.0
 gunicorn==21.2.0
-gdown
+gdown==5.2.0
